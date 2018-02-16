@@ -1,0 +1,331 @@
+#lang racket
+
+(require "test.rkt")
+(require "cal.rkt")
+
+
+;; PRETTY-PRINTER FOR LANGUAGE WHILE
+
+;; default indentation
+;; indent-default : int
+
+
+
+
+;(display "indent-default")
+;(test indent-default 1)
+
+
+
+
+;; searchs a list of indentation specifications
+;; indents-search : context-name * (list indentation-spec) -> int
+
+
+
+
+;(display "indents-search")
+;(test (indents-search "IF" (list (pair "IF" 2) (pair "DO" 4))) 
+;      2)
+
+;(test (indents-search "DO" (list (pair "IF" 2) (pair "DO" 4))) 
+;      4)
+
+;(test (indents-search "WHILE" (list (pair "IF" 2) (pair "DO" 4))) 
+;      indent-default)
+
+;(test (indents-search "IF" empty) 
+;      indent-default)
+
+
+
+;; makes an indentation
+;; make-indent : int -> string
+
+
+
+
+;(display "make-indent")
+;(test (make-indent 0) "")
+;(test (make-indent 4) "    ")
+
+
+
+;;; appends a string before every element of a list of strings
+;;; append-string-before-all : string  * (list string) -> (list string)
+
+
+
+
+;(display "append-string-before-all")
+;(test (append-string-before-all "pref" (list "foo" "bar" "zo")) 
+;      (list "preffoo" "prefbar" "prefzo")) 
+;(test (append-string-before-all "pref" empty) empty)
+
+
+
+
+;;; appends a string after every element of a list of strings
+;;; append-string-after-all : string  *  (list string) -> (list string)
+
+
+
+
+;(display "append-string-after-all")
+;(test (append-string-after-all "suff" (list "foo" "bar" "zo")) 
+;      (list "foosuff" "barsuff" "zosuff")) 
+;(test (append-string-after-all "pref" empty) empty)
+
+
+
+
+;;; pretty-prints an expression
+;;; pretty-print-expr : expression * (list indentation-spec) -> string U error-report
+
+
+
+
+;(display "pretty-print-expr")
+;(test (pretty-print-expr (VAR "X") empty) "X") 
+
+;(test (pretty-print-expr (HD (VAR "X")) empty) "(hd X)") 
+
+;(test (pretty-print-expr (TL (VAR "X")) empty) "(tl X)") 
+
+;(test (pretty-print-expr (CONS (VAR "X") (VAR "Y")) empty) "(cons X Y)") 
+
+;(test (pretty-print-expr (EQ (VAR "X") (VAR "Y")) empty) "X =? Y") 
+
+;(test (pretty-print-expr (EQ (HD (VAR "X")) (CONS (VAR "Y") (VAR "Z"))) empty) 
+;      "(hd X) =? (cons Y Z)") 
+
+
+
+
+;;; pretty-prints a command
+;;; pretty-print-command : command * (list indentation-spec) -> (list string) U error-report
+
+
+
+
+
+;(display "pretty-print-command")
+;(test (pretty-print-command NOP empty) (list "nop"))
+;(test (pretty-print-command (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))) empty) 
+;      (list "X := (cons X Y)"))
+
+
+
+
+;;; pretty-prints a list of commands
+;;; pretty-print-commands : (list command) * (list indentation-spec) -> (list string) U error-report
+
+
+
+
+
+;(display "pretty-print-commands")
+;(test (pretty-print-commands (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y")))) empty) 
+;      (list "X := (cons X Y)"))
+
+;(test (pretty-print-commands (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))) 
+;                                   (SET (VAR "A") (CONS (VAR "B") (VAR "C")))) empty) 
+;      (list "X := (cons X Y) ;" "A := (cons B C)"))
+
+
+;(display "pretty-print-command pour while")
+;(test (pretty-print-command (WHILE (EQ (VAR "X") (VAR "Y")) 
+;                                   (list (SET (VAR "X") 
+;                                              (CONS (VAR "X") 
+;                                                    (VAR "Y"))))) 
+;                            empty) 
+;      (list "while X =? Y do" " X := (cons X Y)" "od"))
+
+;(test (pretty-print-command (WHILE (EQ (VAR "X") (VAR "Y")) 
+;                                   (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))) 
+;                                         (SET (VAR "A") (CONS (VAR "B") (VAR "C"))))) 
+;                            empty) 
+
+;      (list "while X =? Y do" " X := (cons X Y) ;" " A := (cons B C)" "od"))
+
+;(test (pretty-print-command (WHILE (EQ (VAR "X") (VAR "Y")) (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))))) (list (pair "WHILE" 5))) 
+;      (list "while X =? Y do" "     X := (cons X Y)" "od"))
+
+;(test (pretty-print-command (WHILE (EQ (VAR "X") (VAR "Y")) (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))) (SET (VAR "A") (CONS (VAR "B") (VAR "C"))))) (list (pair "WHILE" 5))) 
+;      (list "while X =? Y do" "     X := (cons X Y) ;" "     A := (cons B C)" "od"))
+
+
+;(display "pretty-print-command pour for")
+;(test (pretty-print-command (FOR (VAR "X") 
+;                                 (list (SET (VAR "X") 
+;                                            (CONS (VAR "X") 
+;                                                  (VAR "Y"))))) 
+;                            empty) 
+;      (list "for X do" " X := (cons X Y)" "od"))
+
+;(test (pretty-print-command (FOR (VAR "X")  
+;                                 (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))) 
+;                                       (SET (VAR "A") (CONS (VAR "B") (VAR "C"))))) 
+;                            empty) 
+
+;      (list "for X do" " X := (cons X Y) ;" " A := (cons B C)" "od"))
+
+;(test (pretty-print-command (FOR (VAR "X") (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))))) (list (pair "FOR" 5))) 
+;      (list "for X do" "     X := (cons X Y)" "od"))
+
+;(test (pretty-print-command (FOR (VAR "X") (list (SET (VAR "X") (CONS (VAR "X") (VAR "Y"))) (SET (VAR "A") (CONS (VAR "B") (VAR "C"))))) (list (pair "FOR" 5))) 
+;      (list "for X do" "     X := (cons X Y) ;" "     A := (cons B C)" "od"))
+
+
+;(display "pretty-print-command pour if")
+;(test (pretty-print-command (IF (EQ (VAR "X")(CONS NIL NIL))
+;                                (list (SET (VAR "X") (CONS NIL (VAR "X"))))
+;                                (list (SET (VAR "X") NIL )))
+;            (list (pair "IF" 4)))
+;      (list "if X =? (cons nil nil)" "then" "    X := (cons nil X)" "else" "    X := nil" "fi"))
+;
+;(test (pretty-print-command (IF (EQ (VAR "X")(CONS NIL NIL))
+;                                (list (SET (VAR "X") (CONS NIL (VAR "X"))))
+;                                (list (SET (VAR "X") NIL )))
+;            empty)
+;      (list "if X =? (cons nil nil)" "then" " X := (cons nil X)" "else" " X := nil" "fi"))
+;
+
+;;; pretty prints an input list
+;;; pretty-print-in : (list variable) * (list indentation-spec) -> string U error-report
+
+
+
+
+;(display "pretty-print-in")
+;(test (pretty-print-in (list (VAR "X")) empty) "X")
+;(test (pretty-print-in (list (VAR "X") (VAR "Y")) empty) "X, Y")
+
+
+
+
+;;; pretty-prints an output list
+;;; pretty-print-out : (list variable) * (list indentation-spec) -> string U error-report
+
+
+
+
+;(display "pretty-print-out")
+;(test (pretty-print-out (list (VAR "X")) empty) "X")
+;(test (pretty-print-out (list (VAR "X") (VAR "Y")) empty) "X, Y")
+
+
+
+
+;;; pretty-prints a while program
+;;; pretty-print-progr : program * indentation-specs -> (list string) U error-report
+
+
+
+
+
+;(display "pretty-print-progr")
+;(test (pretty-print-progr (PROGR (list (VAR "X")) 
+;                                 (list (SET (VAR "Y") NIL) 
+;                                       (WHILE (VAR "X") 
+;                                              (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
+;                                                    (SET (VAR "X") (TL (VAR "X"))))) )
+;                                 (list (VAR "Y"))) empty) 
+;      (list "read X" "%" " Y := nil ;" " while X do" "  Y := (cons (hd X) Y) ;" 
+;            "  X := (tl X)" " od" "%" "write Y"))
+
+
+;(test (pretty-print-progr (PROGR (list (VAR "X")) 
+;                                 (list (SET (VAR "Y") NIL) 
+;                                       (WHILE (VAR "X") 
+;                                              (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
+;                                                    (SET (VAR "X") (TL (VAR "X"))))) )
+;                                 (list (VAR "Y"))) (list (pair "WHILE" 5))) 
+;      (list "read X" "%" " Y := nil ;" " while X do" 
+;            "      Y := (cons (hd X) Y) ;" "      X := (tl X)" " od" "%" "write Y"))
+;(test (pretty-print-progr (PROGR (list (VAR "X")) 
+;                                 (list (SET (VAR "Y") NIL) 
+;                                       (WHILE (VAR "X") 
+;                                              (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
+;                                                    (WHILE (VAR "X") 
+;                                                           (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
+;                                                                 (SET (VAR "X") (TL (VAR "X")))))  
+;                                                    (SET (VAR "X") (TL (VAR "X"))))) )
+;                                 (list (VAR "Y"))) (list (pair "WHILE" 5))) 
+;      (list "read X" "%" " Y := nil ;" " while X do" 
+;            "      Y := (cons (hd X) Y) ;" "      while X do" 
+;            "           Y := (cons (hd X) Y) ;" "           X := (tl X)" 
+;            "      od ;" "      X := (tl X)" " od" "%" "write Y"))
+
+
+
+
+;;; pretty-prints a while program
+;;; pretty-print : program x [(list indentation-spec)] -> string U error-report
+
+
+
+
+
+;(display "pretty-print")
+;(test (pretty-print (PROGR (list (VAR "X")) 
+;                           (list (SET (VAR "Y") NIL) 
+;                                 (WHILE (VAR "X") 
+;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
+;                                              (SET (VAR "X") (TL (VAR "X"))))) )
+;                           (list (VAR "Y")))) 
+;      "read X
+;%
+; Y := nil ;
+; while X do
+;  Y := (cons (hd X) Y) ;
+;  X := (tl X)
+; od
+;%
+;write Y")
+;(newline)
+;(display (pretty-print (PROGR (list (VAR "X")) 
+;                           (list (SET (VAR "Y") NIL) 
+;                                 (WHILE (VAR "X") 
+;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
+;                                              (SET (VAR "X") (TL (VAR "X"))))) )
+;                           (list (VAR "Y")))))
+
+
+;(test (pretty-print (PROGR (list (VAR "X")) 
+;                           (list (SET (VAR "Y") NIL) 
+;                                 (WHILE (VAR "X") 
+;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
+;                                              (WHILE (VAR "X") 
+;                                                     (list (SET (VAR "Y") 
+;                                                                (CONS (HD (VAR "X")) (VAR "Y")))               
+;                                                           (SET (VAR "X") (TL (VAR "X")))))  
+;                                              (SET (VAR "X") (TL (VAR "X"))))) )
+;                           (list (VAR "Y"))) 
+;                    (pair "WHILE" 5) (pair "PROGR" 2)) 
+;      "read X
+;%
+;  Y := nil ;
+;  while X do
+;       Y := (cons (hd X) Y) ;
+;       while X do
+;            Y := (cons (hd X) Y) ;
+;            X := (tl X)
+;       od ;
+;       X := (tl X)
+;  od
+;%
+;write Y")
+;(newline)
+;(display (pretty-print (PROGR (list (VAR "X")) 
+;                           (list (SET (VAR "Y") NIL) 
+;                                 (WHILE (VAR "X") 
+;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
+;                                              (WHILE (VAR "X") 
+;                                                     (list (SET (VAR "Y") 
+;                                                                (CONS (HD (VAR "X")) (VAR "Y")))               
+;                                                           (SET (VAR "X") (TL (VAR "X")))))  
+;                                              (SET (VAR "X") (TL (VAR "X"))))) )
+;                           (list (VAR "Y"))) 
+;                    (pair "WHILE" 5) (pair "PROGR" 2)))
+;(newline)
