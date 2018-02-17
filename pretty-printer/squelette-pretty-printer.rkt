@@ -334,7 +334,7 @@
 ;;; pretty-print-progr : program * indentation-specs -> (list string) U error-report
 
 (define (pretty-print-progr p li)
-  (cond [(PROGR? p) (append (cons (string-append "read " (pretty-print-in (PROGR->in p) li)) empty) (cons "%" empty) (append-string-before-all (make-indent (indents-search "" li))(pretty-print-commands (PROGR->body p) li)) (cons "%" empty) (cons (string-append "write " (pretty-print-out (PROGR->out p) li)) empty))
+  (cond [(PROGR? p) (append (cons (string-append "read " (pretty-print-in (PROGR->in p) li)) empty) (cons "%" empty) (append-string-before-all (make-indent (indents-search "PROGR" li))(pretty-print-commands (PROGR->body p) li)) (cons "%" empty) (cons (string-append "write " (pretty-print-out (PROGR->out p) li)) empty))
          ]
         [else empty]
 )
@@ -380,69 +380,80 @@
 ;;; pretty-prints a while program
 ;;; pretty-print : program x [(list indentation-spec)] -> string U error-report
 
+(define (pretty-print p li)
+  (display-p (pretty-print-progr p li))
+  )
+
+;;; affiche la liste de commands
+
+(define (display-p lp)
+  (cond [(empty? lp) ""]
+        [(= (length lp) 1) (car lp)]
+        [else (string-append (car lp) "\n" (display-p (cdr lp)))]
+        )
+  )
 
 
 
+(display "\npretty-print")
+(test (pretty-print (PROGR (list (VAR "X")) 
+                           (list (SET (VAR "Y") NIL) 
+                                 (WHILE (VAR "X") 
+                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
+                                              (SET (VAR "X") (TL (VAR "X"))))) )
+                           (list (VAR "Y"))) empty) 
+      "read X
+%
+ Y := nil ;
+ while X do
+  Y := (cons (hd X) Y) ;
+  X := (tl X)
+ od
+%
+write Y")
+(newline)
+(display (pretty-print (PROGR (list (VAR "X")) 
+                           (list (SET (VAR "Y") NIL) 
+                                 (WHILE (VAR "X") 
+                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
+                                              (SET (VAR "X") (TL (VAR "X"))))) )
+                           (list (VAR "Y"))) empty ))
 
-;(display "pretty-print")
-;(test (pretty-print (PROGR (list (VAR "X")) 
-;                           (list (SET (VAR "Y") NIL) 
-;                                 (WHILE (VAR "X") 
-;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
-;                                              (SET (VAR "X") (TL (VAR "X"))))) )
-;                           (list (VAR "Y")))) 
-;      "read X
-;%
-; Y := nil ;
-; while X do
-;  Y := (cons (hd X) Y) ;
-;  X := (tl X)
-; od
-;%
-;write Y")
-;(newline)
-;(display (pretty-print (PROGR (list (VAR "X")) 
-;                           (list (SET (VAR "Y") NIL) 
-;                                 (WHILE (VAR "X") 
-;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y"))) 
-;                                              (SET (VAR "X") (TL (VAR "X"))))) )
-;                           (list (VAR "Y")))))
 
-
-;(test (pretty-print (PROGR (list (VAR "X")) 
-;                           (list (SET (VAR "Y") NIL) 
-;                                 (WHILE (VAR "X") 
-;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
-;                                              (WHILE (VAR "X") 
-;                                                     (list (SET (VAR "Y") 
-;                                                                (CONS (HD (VAR "X")) (VAR "Y")))               
-;                                                           (SET (VAR "X") (TL (VAR "X")))))  
-;                                              (SET (VAR "X") (TL (VAR "X"))))) )
-;                           (list (VAR "Y"))) 
-;                    (pair "WHILE" 5) (pair "PROGR" 2)) 
-;      "read X
-;%
-;  Y := nil ;
-;  while X do
-;       Y := (cons (hd X) Y) ;
-;       while X do
-;            Y := (cons (hd X) Y) ;
-;            X := (tl X)
-;       od ;
-;       X := (tl X)
-;  od
-;%
-;write Y")
-;(newline)
-;(display (pretty-print (PROGR (list (VAR "X")) 
-;                           (list (SET (VAR "Y") NIL) 
-;                                 (WHILE (VAR "X") 
-;                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
-;                                              (WHILE (VAR "X") 
-;                                                     (list (SET (VAR "Y") 
-;                                                                (CONS (HD (VAR "X")) (VAR "Y")))               
-;                                                           (SET (VAR "X") (TL (VAR "X")))))  
-;                                              (SET (VAR "X") (TL (VAR "X"))))) )
-;                           (list (VAR "Y"))) 
-;                    (pair "WHILE" 5) (pair "PROGR" 2)))
-;(newline)
+(test (pretty-print (PROGR (list (VAR "X")) 
+                           (list (SET (VAR "Y") NIL) 
+                                 (WHILE (VAR "X") 
+                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
+                                              (WHILE (VAR "X") 
+                                                     (list (SET (VAR "Y") 
+                                                                (CONS (HD (VAR "X")) (VAR "Y")))               
+                                                           (SET (VAR "X") (TL (VAR "X")))))  
+                                              (SET (VAR "X") (TL (VAR "X"))))) )
+                           (list (VAR "Y"))) 
+                    (list (pair "WHILE" 5) (pair "PROGR" 2))) 
+      "read X
+%
+  Y := nil ;
+  while X do
+       Y := (cons (hd X) Y) ;
+       while X do
+            Y := (cons (hd X) Y) ;
+            X := (tl X)
+       od ;
+       X := (tl X)
+  od
+%
+write Y")
+(newline)
+(display (pretty-print (PROGR (list (VAR "X")) 
+                           (list (SET (VAR "Y") NIL) 
+                                 (WHILE (VAR "X") 
+                                        (list (SET (VAR "Y") (CONS (HD (VAR "X")) (VAR "Y")))
+                                              (WHILE (VAR "X") 
+                                                     (list (SET (VAR "Y") 
+                                                                (CONS (HD (VAR "X")) (VAR "Y")))               
+                                                           (SET (VAR "X") (TL (VAR "X")))))  
+                                              (SET (VAR "X") (TL (VAR "X"))))) )
+                           (list (VAR "Y"))) 
+                    (list (pair "WHILE" 5) (pair "PROGR" 2))))
+(newline)
