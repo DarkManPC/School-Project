@@ -189,16 +189,40 @@
 ;;; pretty-print-commands : (list command) * (list indentation-spec) -> (list string) U error-report
 
 (define (pretty-print-commands lc li)
-  (cond[(empty? lc) empty]
-       [(= (length lc) 1) (pretty-print-command (car lc) li)]
-       [else (append (point-virgule (pretty-print-command (car lc) li)) (pretty-print-commands (cdr lc) li))]
-       )
+  (list-string (point-virgule (pretty-commands-rec lc li)))
   )
-       
+
+;;; met un point virgule après les commandes d'une ligne 
 (define (point-virgule lc)
   (cond [(empty? lc) empty]
-        [(= (length lc) 1) (cons (string-append (car lc) " ;") empty)]
-        [else lc]
+        [(= (length lc) 1) lc]
+        [(= (length (car lc)) 1) (cons (list (string-append (car (car lc)) " ;")) (point-virgule (cdr lc)))]
+        [else (cons (point-virgule-list (car lc)) (point-virgule (cdr lc)))]
+        )
+  )
+
+;;; met un point virgule au dernier element d'une list
+
+(define (point-virgule-list lc)
+  (cond [(empty? lc) empty]
+        [(= (length lc) 1) (list (string-append (car lc) " ;"))]
+        [else (cons (car lc) (point-virgule-list (cdr lc)))]
+        )
+  )
+
+;;; fait la recursion des commands
+(define (pretty-commands-rec lc li)
+  (cond[(empty? lc) empty]
+       [(= (length lc) 1) (list (pretty-print-command (car lc) li))]
+       [else (cons (pretty-print-command (car lc) li) (pretty-commands-rec (cdr lc) li))]
+       )
+  )
+
+;;; reconstruit une liste de string
+(define (list-string li)
+  (cond [(empty? li) empty]
+        [(= (length li) 1) (car li)]
+        [else (append (car li) (list-string (cdr li)))]
         )
   )
 
